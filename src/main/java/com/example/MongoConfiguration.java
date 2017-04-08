@@ -17,7 +17,7 @@ import com.mongodb.reactivestreams.client.MongoClients;
 @EnableReactiveMongoRepositories
 public class MongoConfiguration extends AbstractReactiveMongoConfiguration {
 
-    @Value("${mongo.database}")
+    @Value("${mongo.database.name}")
     private String database;
 
     @Bean
