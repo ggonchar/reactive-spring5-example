@@ -19,10 +19,10 @@ import com.mongodb.reactivestreams.client.MongoClients;
 @EnableReactiveMongoRepositories
 public class MongoConfiguration extends AbstractReactiveMongoConfiguration {
 
-    private final String database;
+    private final String databaseName;
 
-    public MongoConfiguration(@Value("${mongo.database.name}") String database) {
-        this.database = database;
+    public MongoConfiguration(@Value("${mongo.database.name}") String databaseName) {
+        this.databaseName = databaseName;
     }
 
     @Bean
@@ -37,7 +37,7 @@ public class MongoConfiguration extends AbstractReactiveMongoConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return database;
+        return databaseName;
     }
 
     @Bean
