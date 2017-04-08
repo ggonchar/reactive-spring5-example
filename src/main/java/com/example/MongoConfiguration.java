@@ -17,8 +17,11 @@ import com.mongodb.reactivestreams.client.MongoClients;
 @EnableReactiveMongoRepositories
 public class MongoConfiguration extends AbstractReactiveMongoConfiguration {
 
-    @Value("${mongo.database.name}")
-    private String database;
+    private final String database;
+
+    public MongoConfiguration(@Value("${mongo.database.name}") String database) {
+        this.database = database;
+    }
 
     @Bean
     ObjectMapper objectMapper() {
