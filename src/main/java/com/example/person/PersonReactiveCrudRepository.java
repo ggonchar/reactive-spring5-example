@@ -1,4 +1,4 @@
-package com.example;
+package com.example.person;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
