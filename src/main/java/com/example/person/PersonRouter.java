@@ -14,9 +14,9 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 public class PersonRouter {
 
 
-    private final PersonReactiveCrudRepository repository;
+    private final PersonRepository repository;
 
-    public PersonRouter(PersonReactiveCrudRepository repository) {
+    public PersonRouter(PersonRepository repository) {
         this.repository = repository;
     }
 

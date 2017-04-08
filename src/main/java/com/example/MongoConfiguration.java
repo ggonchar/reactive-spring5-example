@@ -2,7 +2,7 @@ package com.example;
 
 
 import com.example.person.Person;
-import com.example.person.PersonReactiveCrudRepository;
+import com.example.person.PersonRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +41,7 @@ public class MongoConfiguration extends AbstractReactiveMongoConfiguration {
     }
 
     @Bean
-    CommandLineRunner initData(PersonReactiveCrudRepository personRepository) {
+    CommandLineRunner initData(PersonRepository personRepository) {
         return (p) -> {
             personRepository.deleteAll().block();
             personRepository.save(new Person("1", "Eric", "Foo")).block();
