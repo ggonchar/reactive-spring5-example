@@ -13,7 +13,6 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 @Configuration
 public class PersonRouter {
 
-
     private final PersonRepository repository;
 
     public PersonRouter(PersonRepository repository) {
