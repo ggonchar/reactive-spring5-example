@@ -25,8 +25,8 @@ public class IpRouter {
     public RouterFunction<?> ipRoutes() {
         return RouterFunctions.route(GET("/ip/{ip}").and(accept(APPLICATION_JSON)), request -> {
             String ip = request.pathVariable("ip");
-            Mono<String> response = WebClient.create(ipServiceUrl).get().uri("/json/{ip}", ip)
-                    .exchange().then(ipInfo -> ipInfo.bodyToMono(String.class));
+            Mono<String> response = WebClient.create(ipServiceUrl).get().uri("/json/{ip}", ip).exchange()
+                    .flatMap(ipInfo -> ipInfo.bodyToMono(String.class));
             return ServerResponse.ok().body(response, String.class);
         });
     }

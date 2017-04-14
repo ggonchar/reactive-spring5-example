@@ -26,8 +26,8 @@ public class PersonRouter {
                     String personId = request.pathVariable("id");
                     Mono<ServerResponse> notFound = ServerResponse.notFound().build();
                     return repository.findOne(personId)
-                            .then(person -> ServerResponse.ok().body(Mono.just(person), Person.class))
-                            .otherwiseIfEmpty(notFound);
+                            .flatMap(person -> ServerResponse.ok().body(Mono.just(person), Person.class))
+                            .switchIfEmpty(notFound);
                 })
                 .andRoute(GET("/person").and(accept(APPLICATION_JSON)), request ->
                         ServerResponse.ok().body(repository.findAll(), Person.class))
