@@ -9,10 +9,10 @@ import reactor.core.scheduler.Schedulers;
 import java.util.concurrent.Executors;
 
 @Configuration
-public class ThreadConfiguration {
+public class SchedulerConfiguration {
     private final Integer connectionPoolSize;
 
-    public ThreadConfiguration(@Value("${spring.datasource.maximum-pool-size}") Integer connectionPoolSize) {
+    public SchedulerConfiguration(@Value("${spring.datasource.maximum-pool-size}") Integer connectionPoolSize) {
         this.connectionPoolSize = connectionPoolSize;
     }
 
