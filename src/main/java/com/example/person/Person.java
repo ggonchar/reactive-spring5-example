@@ -25,6 +25,18 @@ public class Person {
         this.lastname = lastname;
     }
 
+    public Person(String id, String firstname, String lastname, String ip, Object ipInfo) {
+        this.id = id;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.ip = ip;
+        this.ipInfo = ipInfo;
+    }
+
+    public Person copyWithIpInfo(Object ipInfo) {
+        return new Person(id, firstname, lastname, ip, ipInfo);
+    }
+
     @Id
     public String getId() {
         return id;
