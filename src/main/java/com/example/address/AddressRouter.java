@@ -33,10 +33,14 @@ public class AddressRouter {
     public RouterFunction<?> addressRoutes() {
         return RouterFunctions
                 .route(GET("/address").and(accept(APPLICATION_JSON)), request -> {
-                    Flux<Address> addresses = async(() -> repository.findAll())
+                    Flux<Address> addresses = findAll()
                             .flatMapMany(Flux::fromIterable);
                     return ServerResponse.ok().body(addresses, Address.class);
                 });
+    }
+
+    private Mono<Iterable<Address>> findAll() {
+        return async(() -> repository.findAll());
     }
 
     private <T> Mono<T> async(Callable<T> callable) {

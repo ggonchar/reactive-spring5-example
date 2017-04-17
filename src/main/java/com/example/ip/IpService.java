@@ -8,10 +8,10 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-
 @Service
 public class IpService {
+    private static final String EMPTY_IP_INFO = "{}";
+
     private final String ipServiceUrl, ipFallbackServiceUrl;
     private final CircuitBreaker circuitBreaker;
 
@@ -22,36 +22,27 @@ public class IpService {
     }
 
     public Mono<String> getIpInfo(String ip) {
-        return getIpInfoResponse(ip)
-                .onErrorResume(throwable -> {
-                    circuitBreaker.onError(Duration.ZERO, throwable);
-                    return getFallbackIpInfoResponse(ip);
-                })
-                .flatMap(ipInfo -> tryWithCircuitBreaker(() -> toMonoString(ipInfo)).getOrElse(getIpInfoFallback(ip)));
+        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () ->
+                        requestIpInfo(ip).onErrorResume(t -> requestFallbackIpInfo(ip)).flatMap(this::parse)))
+                .getOrElse(Try.of(() ->
+                        requestFallbackIpInfo(ip).flatMap(this::parse))
+                .getOrElse(Mono.just(EMPTY_IP_INFO)));
     }
 
-    private <T> Try<T> tryWithCircuitBreaker(Try.CheckedSupplier<T> supplier) {
-        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, supplier));
-    }
-
-    private Mono<ClientResponse> getIpInfoResponse(String ip) {
-        return WebClient.create(ipServiceUrl).get().uri("/json/{ip}", ip).exchange();
-    }
-
-    private Mono<ClientResponse> getFallbackIpInfoResponse(String ip) {
-        return WebClient.create(ipFallbackServiceUrl).get().uri("/json/{ip}", ip).exchange();
-    }
-
-    private Mono<String> getIpInfoFallback(String ip) {
-        return getFallbackIpInfoResponse(ip)
-                .flatMap(ipInfo -> ipInfo.bodyToMono(String.class));
-    }
-
-    private Mono<String> toMonoString(ClientResponse response) {
+    private Mono<String> parse(ClientResponse response) {
         if (response.statusCode().is2xxSuccessful()) {
             return response.bodyToMono(String.class);
         } else {
-            throw new RuntimeException();
+            throw new IllegalArgumentException("Request for ip info failed: " + response);
         }
     }
+
+    private Mono<ClientResponse> requestIpInfo(String ip) {
+        return WebClient.create(ipServiceUrl).get().uri("/json/{ip}", ip).exchange();
+    }
+
+    private Mono<ClientResponse> requestFallbackIpInfo(String ip) {
+        return WebClient.create(ipFallbackServiceUrl).get().uri("/json/{ip}", ip).exchange();
+    }
+
 }
