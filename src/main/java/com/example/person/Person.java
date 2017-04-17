@@ -12,13 +12,11 @@ public class Person {
 
     private String lastname;
 
+    private String ip;
+
+    private Object ipInfo;
 
     public Person() {
-    }
-
-    public Person(String firstname, String lastname) {
-        this.firstname = firstname;
-        this.lastname = lastname;
     }
 
     public Person(String id, String firstname, String lastname) {
@@ -26,7 +24,6 @@ public class Person {
         this.firstname = firstname;
         this.lastname = lastname;
     }
-
 
     @Id
     public String getId() {
@@ -53,34 +50,39 @@ public class Person {
         this.lastname = lastname;
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public Object getIpInfo() {
+        return ipInfo;
+    }
+
+    public void setIpInfo(Object ipInfo) {
+        this.ipInfo = ipInfo;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         Person person = (Person) o;
 
-        if (id != null ? !id.equals(person.id) : person.id != null) {
-            return false;
-        }
-        if (firstname != null ? !firstname.equals(person.firstname) :
-                person.firstname != null) {
-            return false;
-        }
-        return lastname != null ? lastname.equals(person.lastname) :
-                person.lastname == null;
-
+        if (firstname != null ? !firstname.equals(person.firstname) : person.firstname != null) return false;
+        if (lastname != null ? !lastname.equals(person.lastname) : person.lastname != null) return false;
+        return ip != null ? ip.equals(person.ip) : person.ip == null;
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (firstname != null ? firstname.hashCode() : 0);
+        int result = firstname != null ? firstname.hashCode() : 0;
         result = 31 * result + (lastname != null ? lastname.hashCode() : 0);
+        result = 31 * result + (ip != null ? ip.hashCode() : 0);
         return result;
     }
 

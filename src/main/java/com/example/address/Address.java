@@ -6,7 +6,7 @@ import javax.persistence.Id;
 
 @Entity
 public class Address {
-    private @Id @GeneratedValue Long id;
+    private Long id;
     private String personId;
     private String street;
     private String zipCode;
@@ -20,6 +20,7 @@ public class Address {
         this.zipCode = zipCode;
     }
 
+    @Id @GeneratedValue
     public Long getId() {
         return id;
     }
