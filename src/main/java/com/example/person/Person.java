@@ -20,12 +20,6 @@ public class Person {
     private Person() {
     }
 
-    public Person(String id, String firstname, String lastname) {
-        this.id = id;
-        this.firstname = firstname;
-        this.lastname = lastname;
-    }
-
     public Person(String id, String firstname, String lastname, String ip, Object ipInfo) {
         this.id = id;
         this.firstname = firstname;
