@@ -1,6 +1,7 @@
 package com.example.person;
 
 import com.example.ip.IpService;
+import com.mongodb.util.JSON;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -44,7 +45,7 @@ public class PersonRouter {
     }
 
     private Mono<Person> copyWithIpInfo(Person person) {
-        return ipService.getIpInfo(person.getIp()).map(ipInfo -> person.copyWithIpInfo(ipInfo));
+        return ipService.getIpInfo(person.getIp()).map(ipInfo -> person.copyWithIpInfo(JSON.parse(ipInfo)));
     }
 
 }
