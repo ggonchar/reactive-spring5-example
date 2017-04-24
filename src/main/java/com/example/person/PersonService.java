@@ -45,7 +45,7 @@ public class PersonService {
                 .parallel(2)
                 .flatMap(this::updateIpInfo)
                 .subscribe(
-                        p -> log.trace("Updated IP information for person", p),
+                        p -> log.info("Updated IP information for person with id {}", p.getId()),
                         t -> log.error("Failed IP information update stream", t)
                 );
     }
