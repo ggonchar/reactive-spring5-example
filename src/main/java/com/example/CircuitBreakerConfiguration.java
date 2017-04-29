@@ -15,7 +15,7 @@ public class CircuitBreakerConfiguration {
         CircuitBreakerConfig config = CircuitBreakerConfig.custom()
                 .waitDurationInOpenState(Duration.ofMinutes(5))
                 .ringBufferSizeInClosedState(100)
-                .ringBufferSizeInHalfOpenState(100)
+                .ringBufferSizeInHalfOpenState(30)
                 .failureRateThreshold(10)
                 .build();
         return CircuitBreaker.of("ipService", config);

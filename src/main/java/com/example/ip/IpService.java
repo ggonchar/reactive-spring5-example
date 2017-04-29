@@ -11,6 +11,8 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Service
 public class IpService {
     private final static Logger log = LoggerFactory.getLogger(IpService.class);
@@ -29,13 +31,15 @@ public class IpService {
     }
 
     public Mono<String> getIpInfo(String ip) {
-        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () ->
-                        requestIpInfo(ip).onErrorResume(t -> requestFallbackIpInfo(ip)).flatMap(this::parse)))
-                .onFailure(t -> log.error("Failed to obtain IP information, fallback provider will be used", t))
-                .getOrElse(Try.of(() -> requestFallbackIpInfo(ip).flatMap(this::parse))
-                .onFailure(t -> log.error("Failed to obtain IP information from fallback provider, empty result will be returned", t))
-                .getOrElse(Mono.just(EMPTY_IP_INFO)));
+        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () -> requestIpInfo(ip).onErrorResume(t -> {
+                circuitBreaker.onError(Duration.ZERO, t);
+                return requestFallbackIpInfo(ip);
+        }))).getOrElse(requestFallbackIpInfo(ip))
+                .flatMap(this::parse)
+                .doOnError(t -> log.error("Failed to obtain or parse ip info", t))
+                .onErrorReturn(EMPTY_IP_INFO);
     }
+
 
     private Mono<String> parse(ClientResponse response) {
         if (response.statusCode().is2xxSuccessful()) {
@@ -46,11 +50,15 @@ public class IpService {
     }
 
     private Mono<ClientResponse> requestIpInfo(String ip) {
-        return WebClient.create(ipServiceUrl).get().uri("/json/{ip}", ip).exchange();
+        return WebClient.create(ipServiceUrl).get().uri("/json/{ip}", ip).exchange().doOnError(t ->
+                log.error("Failed to obtain IP information from primary provider", t)
+        );
     }
 
     private Mono<ClientResponse> requestFallbackIpInfo(String ip) {
-        return WebClient.create(ipFallbackServiceUrl).get().uri("/json/{ip}", ip).exchange();
+        return WebClient.create(ipFallbackServiceUrl).get().uri("/json/{ip}", ip).exchange().doOnError(t ->
+                log.error("Failed to obtain IP information from fallback provider", t)
+        );
     }
 
 }
