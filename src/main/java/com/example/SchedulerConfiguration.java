@@ -20,4 +20,9 @@ public class SchedulerConfiguration {
     public Scheduler jdbcScheduler() {
         return Schedulers.fromExecutor(Executors.newFixedThreadPool(connectionPoolSize));
     }
+
+    @Bean
+    public Scheduler jmsProducerScheduler() {
+        return Schedulers.fromExecutor(Executors.newFixedThreadPool(10));
+    }
 }

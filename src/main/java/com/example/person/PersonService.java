@@ -39,8 +39,8 @@ public class PersonService {
 
     public void updateIpInfo() {
         repository.findAll()
-                .buffer(10)
-                .onBackpressureBuffer(1000, BufferOverflowStrategy.ERROR)
+                .buffer(100)
+                .onBackpressureBuffer(5000, BufferOverflowStrategy.ERROR)
                 .retry(2)
                 .parallel(2)
                 .flatMap(this::updateIpInfo)

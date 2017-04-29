@@ -2,6 +2,7 @@ package com.example.person;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -10,6 +11,7 @@ import reactor.core.publisher.Mono;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
+import static org.springframework.web.reactive.function.BodyInserters.fromServerSentEvents;
 
 @Configuration
 public class PersonRouter {
@@ -45,7 +47,7 @@ public class PersonRouter {
                     return ServerResponse.ok().build();
                 })
                 .andRoute(GET("/person/stream").and(accept(TEXT_EVENT_STREAM)), request ->
-                     ServerResponse.ok().body(reciever.messageStream())
+                     ServerResponse.ok().body(fromServerSentEvents(reciever.messageStream(), String.class))
                 );
     }
 
