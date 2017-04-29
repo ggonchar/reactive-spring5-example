@@ -5,10 +5,8 @@ import javaslang.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -19,22 +17,22 @@ public class IpService {
 
     private static final String EMPTY_IP_INFO = "{}";
 
-    private final String ipServiceUrl, ipFallbackServiceUrl;
     private final CircuitBreaker circuitBreaker;
+    private final IpInfoProxy primaryProxy, fallbackProxy;
 
-    public IpService(@Value("${ip.service.url}") String ipServiceUrl,
-                     @Value("${ip.fallback.service.url}") String ipFallbackServiceUrl,
+    public IpService(@Qualifier("primaryIpInfoProxy") IpInfoProxy primaryProxy,
+                     @Qualifier("fallbackIpInfoProxy") IpInfoProxy fallbackProxy,
                      @Qualifier("ipServiceCircuitBreaker") CircuitBreaker circuitBreaker) {
-        this.ipServiceUrl = ipServiceUrl;
-        this.ipFallbackServiceUrl = ipFallbackServiceUrl;
         this.circuitBreaker = circuitBreaker;
+        this.primaryProxy = primaryProxy;
+        this.fallbackProxy = fallbackProxy;
     }
 
     public Mono<String> getIpInfo(String ip) {
-        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () -> requestIpInfo(ip).onErrorResume(t -> {
+        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () -> primaryProxy.requestIpInfo(ip).onErrorResume(t -> {
                 circuitBreaker.onError(Duration.ZERO, t);
-                return requestFallbackIpInfo(ip);
-        }))).getOrElse(requestFallbackIpInfo(ip))
+                return fallbackProxy.requestIpInfo(ip);
+        }))).getOrElse(fallbackProxy.requestIpInfo(ip))
                 .flatMap(this::parse)
                 .doOnError(t -> log.error("Failed to obtain or parse ip info", t))
                 .onErrorReturn(EMPTY_IP_INFO);
@@ -49,16 +47,5 @@ public class IpService {
         }
     }
 
-    private Mono<ClientResponse> requestIpInfo(String ip) {
-        return WebClient.create(ipServiceUrl).get().uri("/json/{ip}", ip).exchange().doOnError(t ->
-                log.error("Failed to obtain IP information from primary provider", t)
-        );
-    }
-
-    private Mono<ClientResponse> requestFallbackIpInfo(String ip) {
-        return WebClient.create(ipFallbackServiceUrl).get().uri("/json/{ip}", ip).exchange().doOnError(t ->
-                log.error("Failed to obtain IP information from fallback provider", t)
-        );
-    }
-
 }
+
