@@ -15,7 +15,7 @@ import java.time.Duration;
 public class IpService {
     private final static Logger log = LoggerFactory.getLogger(IpService.class);
 
-    private static final String EMPTY_IP_INFO = "{}";
+    public static final String EMPTY_IP_INFO = "{}";
 
     private final CircuitBreaker circuitBreaker;
     private final IpInfoProxy primaryProxy, fallbackProxy;
@@ -32,7 +32,7 @@ public class IpService {
         return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () -> primaryProxy.requestIpInfo(ip).onErrorResume(t -> {
                 circuitBreaker.onError(Duration.ZERO, t);
                 return fallbackProxy.requestIpInfo(ip);
-        }))).getOrElse(fallbackProxy.requestIpInfo(ip))
+        }))).getOrElse(() -> fallbackProxy.requestIpInfo(ip))
                 .flatMap(this::parse)
                 .doOnError(t -> log.error("Failed to obtain or parse ip info", t))
                 .onErrorReturn(EMPTY_IP_INFO);
