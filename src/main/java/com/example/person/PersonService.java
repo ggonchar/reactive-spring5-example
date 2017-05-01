@@ -9,6 +9,7 @@ import reactor.core.publisher.BufferOverflowStrategy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -38,7 +39,7 @@ public class PersonService {
     }
 
     public void updateIpInfo() {
-        repository.findAll()
+        repository.findByUpdatedAtLessThan(LocalDateTime.now().minusDays(90))
                 .buffer(300)
                 .onBackpressureBuffer(5000)
                 .parallel(2)

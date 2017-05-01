@@ -3,6 +3,8 @@ package com.example.person;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document
 public class Person {
 
@@ -17,6 +19,8 @@ public class Person {
 
     private Object ipInfo;
 
+    private LocalDateTime updatedAt;
+
     private Person() {
     }
 
@@ -26,6 +30,7 @@ public class Person {
         this.lastname = lastname;
         this.ip = ip;
         this.ipInfo = ipInfo;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Person copyWithIpInfo(Object ipInfo) {
@@ -52,4 +57,7 @@ public class Person {
         return ipInfo;
     }
 
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }
