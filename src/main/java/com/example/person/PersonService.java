@@ -39,9 +39,8 @@ public class PersonService {
 
     public void updateIpInfo() {
         repository.findAll()
-                .buffer(100)
-                .onBackpressureBuffer(5000, BufferOverflowStrategy.ERROR)
-                .retry(2)
+                .buffer(300)
+                .onBackpressureBuffer(5000)
                 .parallel(2)
                 .flatMap(this::updateIpInfo)
                 .subscribe(
@@ -52,7 +51,9 @@ public class PersonService {
 
     private Flux<Person> updateIpInfo(List<Person> batch) {
         return batch.stream()
-                .map(p -> repository.save(addIpInfo(p)))
-                .reduce(Flux.empty(), (Flux<Person> previous, Flux<Person> next) -> previous.concatWith(next));
+                .map(this::addIpInfo)
+                .map(monoP -> monoP.flux())
+                .reduce(Flux.empty(), (p1, p2) -> p1.concatWith(p2))
+                .flatMap(repository::save);
     }
 }
