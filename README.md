@@ -1,5 +1,5 @@
 # Overview
-This application demonstrates main concerns of reactive applications design with Spring 5 WebFlux & Reactor with different integrations such as WebClient, Spring Data MongoDB, Spring Data JPA, Spring Integrations etc.
+This application demonstrates main concerns of reactive applications design with Spring 5 WebFlux & Reactor with different integrations such as WebClient, Spring Data MongoDB, Spring Data JPA.
 
 # Run
 

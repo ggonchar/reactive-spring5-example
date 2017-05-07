@@ -5,7 +5,6 @@ import com.mongodb.util.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.BufferOverflowStrategy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,18 +19,14 @@ public class PersonService {
 
     private final PersonRepository repository;
 
-    private final PersonSender sender;
-
-    public PersonService(IpService ipService, PersonRepository repository, PersonSender sender) {
+    public PersonService(IpService ipService, PersonRepository repository) {
         this.ipService = ipService;
         this.repository = repository;
-        this.sender = sender;
     }
 
     public Mono<Person> addPerson(Mono<Person> mono) {
         return mono.flatMap(this::addIpInfo)
-                .flatMap(repository::save)
-                .flatMap(sender::send);
+                .flatMap(repository::save);
     }
 
     private Mono<Person> addIpInfo(Person person) {
@@ -39,7 +34,8 @@ public class PersonService {
     }
 
     public void updateIpInfo() {
-        repository.findByUpdatedAtLessThan(LocalDateTime.now().minusDays(90))
+        LocalDateTime dateTime = LocalDateTime.now().minusDays(90);
+        repository.findByUpdatedAtLessThan(dateTime)
                 .buffer(300)
                 .onBackpressureBuffer(5000)
                 .parallel(2)

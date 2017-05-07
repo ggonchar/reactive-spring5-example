@@ -29,10 +29,12 @@ public class IpService {
     }
 
     public Mono<String> getIpInfo(String ip) {
-        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () -> primaryProxy.requestIpInfo(ip).onErrorResume(t -> {
-                circuitBreaker.onError(Duration.ZERO, t);
-                return fallbackProxy.requestIpInfo(ip);
-        }))).getOrElse(() -> fallbackProxy.requestIpInfo(ip))
+        return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () ->
+                primaryProxy.requestIpInfo(ip).onErrorResume(t -> {
+                    circuitBreaker.onError(Duration.ZERO, t);
+                    return fallbackProxy.requestIpInfo(ip);
+                })
+        )).getOrElse(() -> fallbackProxy.requestIpInfo(ip))
                 .flatMap(this::parse)
                 .doOnError(t -> log.error("Failed to obtain or parse ip info", t))
                 .onErrorReturn(EMPTY_IP_INFO);
