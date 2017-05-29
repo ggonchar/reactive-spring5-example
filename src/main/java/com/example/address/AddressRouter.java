@@ -3,15 +3,16 @@ package com.example.address;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
-
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -19,14 +20,16 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 
 @Configuration
 public class AddressRouter {
-
     private final AddressRepository repository;
 
     private final Scheduler scheduler;
 
-    public AddressRouter(AddressRepository repository, @Qualifier("jdbcScheduler") Scheduler scheduler) {
+    private final AsyncTransactionTemplate txTemplate;
+
+    public AddressRouter(AddressRepository repository, @Qualifier("jdbcScheduler") Scheduler scheduler, AsyncTransactionTemplate txTemplate) {
         this.repository = repository;
         this.scheduler = scheduler;
+        this.txTemplate = txTemplate;
     }
 
     @Bean
@@ -40,10 +43,7 @@ public class AddressRouter {
     }
 
     private Mono<Iterable<Address>> findAll() {
-        return async(() -> repository.findAll());
+        return txTemplate.asyncTx(() -> repository.findAll());
     }
 
-    private <T> Mono<T> async(Callable<T> callable) {
-        return Mono.fromCallable(callable).publishOn(scheduler);
-    }
 }
