@@ -13,12 +13,9 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 @Configuration
 public class PersonRouter {
 
-    private final PersonRepository repository;
-
     private final PersonService service;
 
-    public PersonRouter(PersonRepository repository, PersonService service) {
-        this.repository = repository;
+    public PersonRouter(PersonService service) {
         this.service = service;
     }
 
@@ -28,19 +25,14 @@ public class PersonRouter {
                 .route(GET("/person/{id}").and(accept(APPLICATION_JSON)), request -> {
                     String personId = request.pathVariable("id");
                     Mono<ServerResponse> notFound = ServerResponse.notFound().build();
-                    return repository.findById(personId)
+                    return service.findById(Long.getLong(personId))
                             .flatMap(person -> ServerResponse.ok().body(Mono.just(person), Person.class))
                             .switchIfEmpty(notFound);
                 })
                 .andRoute(GET("/person").and(accept(APPLICATION_JSON)), request ->
-                        ServerResponse.ok().body(repository.findAll(), Person.class))
+                        ServerResponse.ok().body(service.findAll(), Person.class))
                 .andRoute(POST("/person").and(contentType(APPLICATION_JSON)), request ->
-                        ServerResponse.ok().body(service.addPerson(request.bodyToMono(Person.class)), Person.class))
-                .andRoute(POST("/person/ip_info/update"), request -> {
-                    service.updateIpInfo();
-                    return ServerResponse.ok().build();
-                });
+                        ServerResponse.ok().body(service.addPerson(request.bodyToMono(Person.class)), Person.class));
     }
-
 
 }

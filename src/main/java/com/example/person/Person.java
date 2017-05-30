@@ -1,15 +1,17 @@
 package com.example.person;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.time.LocalDateTime;
 
-@Document
+@Entity
 public class Person {
 
     @Id
-    private String id;
+    @GeneratedValue
+    private Long id;
 
     private String firstname;
 
@@ -17,14 +19,15 @@ public class Person {
 
     private String ip;
 
-    private Object ipInfo;
+    @Column(columnDefinition="varchar(1024)")
+    private String ipInfo;
 
     private LocalDateTime updatedAt;
 
     private Person() {
     }
 
-    public Person(String id, String firstname, String lastname, String ip, Object ipInfo) {
+    public Person(Long id, String firstname, String lastname, String ip, String ipInfo) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -33,11 +36,11 @@ public class Person {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Person copyWithIpInfo(Object ipInfo) {
+    public Person copyWithIpInfo(String ipInfo) {
         return new Person(id, firstname, lastname, ip, ipInfo);
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -53,7 +56,7 @@ public class Person {
         return ip;
     }
 
-    public Object getIpInfo() {
+    public String getIpInfo() {
         return ipInfo;
     }
 

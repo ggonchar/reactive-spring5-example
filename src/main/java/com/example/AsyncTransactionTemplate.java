@@ -1,4 +1,4 @@
-package com.example.address;
+package com.example;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
