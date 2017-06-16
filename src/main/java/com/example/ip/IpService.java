@@ -1,15 +1,13 @@
 package com.example.ip;
 
-import io.github.robwin.circuitbreaker.CircuitBreaker;
-import javaslang.control.Try;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.vavr.control.Try;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
 
 @Service
 public class IpService {
@@ -31,7 +29,7 @@ public class IpService {
     public Mono<String> getIpInfo(String ip) {
         return Try.of(CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () ->
                 primaryProxy.requestIpInfo(ip).onErrorResume(t -> {
-                    circuitBreaker.onError(Duration.ZERO, t);
+                    circuitBreaker.onError(0l, t);
                     return fallbackProxy.requestIpInfo(ip);
                 })
         )).getOrElse(() -> fallbackProxy.requestIpInfo(ip))

@@ -1,6 +1,6 @@
 package com.example.ip;
 
-import io.github.robwin.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;

@@ -1,7 +1,7 @@
 package com.example;
 
-import io.github.robwin.circuitbreaker.CircuitBreaker;
-import io.github.robwin.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
